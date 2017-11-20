@@ -13,9 +13,9 @@ class dbConn
             try
               {
                 self::$db = new PDO('mysql:host=' . CONNECTION .';dbname=' .DATABASE, USERNAME, PASSWORD );
+
                 self::$db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-                 echo "<b>Connected successfully</b>";
-                 echo "<br><hr>";
+                
               }
             catch (PDOException $e)
               {
@@ -32,4 +32,24 @@ class dbConn
              return self::$db;
          } 
 }
+abstract class collection {
+    protected $html;
+    // Function to create model
+    static public function create() {
+        $model = new static::$modelName;
+        return $model;
+    }
+    // Function to find all records
+    static public function findAll() {
+        $db = dbConn::getConnection();
+        $tableName = get_called_class();
+        $sql = 'SELECT * FROM ' . $tableName;
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $class = static::$modelName;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, $class);
+        $record =  $stmt->fetchAll();
+        return $record;
+    }
+
 ?>
