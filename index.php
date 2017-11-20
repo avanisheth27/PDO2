@@ -113,6 +113,33 @@ abstract class model
         $sql =  'INSERT INTO '.$tableName.' ('.$columnString.') VALUES ('.$valueString.')';
         return $sql;
     }
+
+    private function update()
+     {  
+        $modelName=get_called_class();
+        $tableName = $modelName::getTablename();
+        $array = get_object_vars($this);
+        $comma = " ";
+        $sql = 'UPDATE '.$tableName.' SET ';
+        foreach ($array as $key=>$value){
+            if( ! empty($value)) {
+                $sql .= $comma . $key . ' = "'. $value .'"';
+                $comma = ", ";
+                }
+         }
+            $sql .= ' WHERE id='.$this->id;
+        return $sql;
+    }
+    // Function to delete a record
+    public function delete() {
+        $db = dbConn::getConnection();
+        $modelName=get_called_class();
+        $tableName = $modelName::getTablename();
+        $sql = 'DELETE FROM '.$tableName.' WHERE id ='.$this->id;
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+    }
+}
 class account extends model 
 {
     public $id;
@@ -171,5 +198,5 @@ class main{
 
   }
 }
-}
+
 ?>
