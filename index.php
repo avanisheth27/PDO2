@@ -1,49 +1,47 @@
 <?php
-ini_set('display_errors', 'On');
-error_reporting(E_ALL);
 define('DATABASE', 'avs44');
 define('USERNAME', 'avs44');
-define('PASSWORD', 'DNcqRhRg5');
+define('PASSWORD', '7Y9hAplQW');
 define('CONNECTION', 'sql2.njit.edu');
-class dbConn
-{
-       protected static $db;
-       private function __construct()
-         {
-            try
-              {
-                self::$db = new PDO('mysql:host=' . CONNECTION .';dbname=' .DATABASE, USERNAME, PASSWORD );
-
-                self::$db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-                
-              }
-            catch (PDOException $e)
-              {
-                
-                echo "Connection Error: " . $e->getMessage();
-              }
-         }
-       public static function getConnection()
-         {
-            if (!self::$db)
-             {
-              new dbConn();
-             }
-             return self::$db;
-         } 
+class Manage {
+    public static function autoload($class) {
+        include $class . '.php';
+    }
 }
-abstract class collection 
-{
+spl_autoload_register(array('Manage', 'autoload'));
+$obj=new displayHtml;
+$obj=new main();
+class dbConn{
+    protected static $db;
+    private function __construct() {
+        try {
+            self::$db = new PDO( 'mysql:host=' . CONNECTION .';dbname=' . DATABASE, USERNAME, PASSWORD );
+            self::$db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+        } catch (PDOException $e) {
+        
+            echo "Connection Error: " . $e->getMessage();
+        }
+    }
+   
+    public static function getConnection() {
+      
+        if (!self::$db) {
+            //new connection object.
+            new dbConn();
+        }
+        return self::$db;
+    }
+}
+// Abstract class that handles collections
+abstract class collection {
     protected $html;
-    
-    static public function create() 
-    {
+    // Function to create model
+    static public function create() {
         $model = new static::$modelName;
         return $model;
     }
-    
-    static public function findAll() 
-    {
+    // Function to find all records
+    static public function findAll() {
         $db = dbConn::getConnection();
         $tableName = get_called_class();
         $sql = 'SELECT * FROM ' . $tableName;
@@ -51,12 +49,11 @@ abstract class collection
         $stmt->execute();
         $class = static::$modelName;
         $stmt->setFetchMode(PDO::FETCH_CLASS, $class);
-        $record =  $stmt->fetchAll();
-        return $record;
+        $records =  $stmt->fetchAll();
+        return $records;
     }
-
-     static public function findOne($id) 
-     {
+    // Function to find one record 
+    static public function findOne($id) {
         $db = dbConn::getConnection();
         $tableName = get_called_class();
         $sql = 'SELECT * FROM ' . $tableName . ' WHERE id =' . $id;
@@ -64,47 +61,40 @@ abstract class collection
         $stmt->execute();
         $class = static::$modelName;
         $stmt->setFetchMode(PDO::FETCH_CLASS, $class);
-        $record =  $stmt->fetchAll();
-        return $record[0];
+        $records =  $stmt->fetchAll();
+        return $records[0];
     }
 }
-//accounts table
-class accounts extends collection 
-{
+// Collection for accounts table 
+class accounts extends collection {
     protected static $modelName = 'account';
 }
-//todos table
-class todos extends collection 
-{
+// Collection for todos table
+class todos extends collection {
     protected static $modelName = 'todo';
 }
-abstract class model 
-{
+// Abstract class for data model operations  
+abstract class model {
     protected $tableName;
     // Function to save record
-   public function save()
-    {
-        if ($this->id != '') 
-        {
+    public function save(){
+        if ($this->id != '') {
             $sql = $this->update();
-        } else
-         {
+        } else {
            $sql = $this->insert();
-         }
+        }
         $db = dbConn::getConnection();
         $stmt = $db->prepare($sql);
         $array = get_object_vars($this);
-        foreach (array_flip($array) as $key=>$value)
-        {
+        foreach (array_flip($array) as $key=>$value){
             $stmt->bindParam(":$value", $this->$value);
         }
         $stmt->execute();
         $id = $db->lastInsertId();
-      return $id;
+        return $id;
     }
-
-    private function insert() 
-    {      
+    // Function to insert new record
+    private function insert() {      
         $modelName=get_called_class();
         $tableName = $modelName::getTablename();
         $array = get_object_vars($this);
@@ -113,9 +103,8 @@ abstract class model
         $sql =  'INSERT INTO '.$tableName.' ('.$columnString.') VALUES ('.$valueString.')';
         return $sql;
     }
-
-    private function update()
-     {  
+    // Function to update an exisiting record
+    private function update() {  
         $modelName=get_called_class();
         $tableName = $modelName::getTablename();
         $array = get_object_vars($this);
@@ -126,7 +115,7 @@ abstract class model
                 $sql .= $comma . $key . ' = "'. $value .'"';
                 $comma = ", ";
                 }
-         }
+            }
             $sql .= ' WHERE id='.$this->id;
         return $sql;
     }
@@ -140,8 +129,8 @@ abstract class model
         $stmt->execute();
     }
 }
-class account extends model 
-{
+// Accounts table model
+class account extends model {
     public $id;
     public $email;
     public $fname;
@@ -156,8 +145,7 @@ class account extends model
     }
 }
 // Todos table model
-class todo extends model 
-{
+class todo extends model {
     public $id;
     public $owneremail;
     public $ownerid;
@@ -165,67 +153,62 @@ class todo extends model
     public $duedate;
     public $message;
     public $isdone;
-    public static function getTablename()
-    {
+    public static function getTablename(){
         $tableName='todos';
         return $tableName;
     }
 } 
-
+// main handler for executing queries and displaying results 
 class main{
-   public function __construct()
-   {
-    // ACCOUNTS TABLE 
+   public function __construct(){
+    // ************** ACCOUNTS TABLE ***************
     // Finding all Records
     $HTMLtag = '<html>';
     $HTMLtag .= '<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">';
     $HTMLtag .= '<link rel="stylesheet" href="styles.css">';
     $HTMLtag .= '<body>'; 
     $HTMLtag .= '<h1>Accounts table</h2>';
-    $HTMLtag .= '<h2>1) Display All Records</h2>';
     $records = accounts::findAll();
     $html = displayHtml::displayTable($records);
-    $HTMLtag .='<left>'.$html.'</left><hr>'; 
+    $HTMLtag .='<left>'.$html.'</left>'; 
     // Finding single record 
     $id = 2;
     $records = accounts::findOne($id);
     $html = displayHtml::displayTableAlternate($records);
-    $HTMLtag .= '<h2> 2) Display One Record</h2>';
-    $HTMLtag .="<h3>Record fetched with the following id - ".$id."</h3>";
-    $HTMLtag .= '<left>'.$html.'</left><hr>';
-
-     // Inserting New Record
-    $HTMLtag .="<h2> 3) Insert:</h2>";
+    $HTMLtag .= '<h2> 1) Display One Record</h2>';
+    $HTMLtag .="<h3>Record with the id - ".$id."</h3>";
+    $HTMLtag .= '<left>'.$html.'</left>';
+    
+    $HTMLtag .="<h2> 2) Insert Function</h2>";
     $record = new account();
-    $record->email="palak659@njit.edu";
+    $record->email="pp333@njit.edu";
     $record->fname="palak";
     $record->lname="patel";
-    $record->phone="66612";
-    $record->birthday="9-1-2000";
+    $record->phone="3333333";
+    $record->birthday="10-1-2007";
     $record->gender="female";
-    $record->password="hhhhhh";
+    $record->password="5555";
     $lstId=$record->save();
     $records = accounts::findAll();
-    $HTMLtag .="<h3> New record inserted with the following id - ".$lstId."</h3>";
+    $HTMLtag .="<h3> New record inserted - ".$lstId."</h3>";
     $html = displayHtml::displayTable($records);
-    $HTMLtag .='<h3>Record is inserted - </h3>';
-    $HTMLtag .='<left>'.$html.'</left><hr>';
-    // Updating exisiting record 
-    $HTMLtag .= "<h2> 4) Updating Record</h2>";
+    $HTMLtag .='<left>'.$html.'</left>';
+    
+    $HTMLtag .= "<h2> 3) Update Function</h2>";
     $records = accounts::findOne($lstId);
     $record = new account();
     $record->id=$records->id;
-    $record->email="updatedemail@njit.edu";
+    $record->email="palakpatel@njit.edu";
     $record->fname="ppppp";
     $record->lname="p2";
-    $record->gender="female";
+    $record->gender="UPDATED";
     $record->save();
     $records = accounts::findAll();
     $HTMLtag .="<h3>Updating the record with the following id: ".$lstId."</h3>";
     $html = displayHtml::displayTable($records);
-    $HTMLtag .='<left>'.$html.'</left><hr>';
-    // Deleting Record 
-    $HTMLtag .= "<h2> 5) Delete a Record</h2>";
+    $HTMLtag .='<left>'.$html.'</left>';
+    
+    $HTMLtag .= "<h2> 4) Delete a Record</h2>";
     $records = accounts::findOne($lstId);
     $record= new account();
     $record->id=$records->id;
@@ -235,11 +218,59 @@ class main{
     $html = displayHtml::displayTable($records);
     $HTMLtag .='<h3>After record has been deleteds</h3>';
     $HTMLtag .='<left>'.$html.'</left><br><hr>';
-   
+    // ************** TODOS TABLE ***************
+    // Finding all records 
+    $HTMLtag .= '<h1>Todos Table</h1>';
+    $HTMLtag .= '<h3> 1) Display All Records</h3>';
+    $records = todos::findAll();
+    $html = displayHtml::displayTable($records); 
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    // Finding one record
+    $id = 1;
+    $records = todos::findOne($id);
+    $html = displayHtml::displayTableAlternate($records);
+    $HTMLtag .='<h2>2) Display one Record</h2>';
+    $HTMLtag .='<h3> Record with the following id: '.$id.'</h3>';
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    // Inserting a record
+    $HTMLtag .="<h2> 3) Insert Function</h2>";
+    $record = new todo();
+    $record->owneremail="nan@njit.edu";
+    $record->ownerid=55;
+    $record->createddate="1-05-1999";
+    $record->duedate="5-06-2011";
+    $record->message="DONE";
+    $record->isdone=1;
+    $lstId=$record->save();
+    $records = todos::findAll();
+    $HTMLtag .="<h3>Record inserted id - ".$lstId."</h3>";
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    // Updating a record
+    $HTMLtag .="<h3> 4) Update Function</h3>";
+    $records = todos::findOne($lstId);
+    $record = new todo();
+    $record->id=$records->id;
+    $record->owneremail="Nandan@njit.edu";
+    $record->message="CHANGED";
+    $record->save();
+    $records = todos::findAll();
+    $HTMLtag .="<h3>Updating a record with the id: ".$lstId."</h3>";
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    // Delete a record
+    $HTMLtag .= "<h2> 5) Delete Function</h2>";
+    $records = todos::findOne($lstId);
+    $record= new todo();
+    $record->id=$records->id;
+    $records->delete();
+    $HTMLtag .='<h3>Record with the id: '.$records->id.' has been deleted</h3>';
+    $records = todos::findAll();
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .="<h4>The Row has been Deleted , Table :</h4>";
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    $HTMLtag .='</body></html>';
     print_r($HTMLtag);
-
-
-  }
+    }
 }
-
 ?>
