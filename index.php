@@ -32,15 +32,18 @@ class dbConn
              return self::$db;
          } 
 }
-abstract class collection {
+abstract class collection 
+{
     protected $html;
-    // Function to create model
-    static public function create() {
+    
+    static public function create() 
+    {
         $model = new static::$modelName;
         return $model;
     }
-    // Function to find all records
-    static public function findAll() {
+    
+    static public function findAll() 
+    {
         $db = dbConn::getConnection();
         $tableName = get_called_class();
         $sql = 'SELECT * FROM ' . $tableName;
@@ -51,5 +54,5 @@ abstract class collection {
         $record =  $stmt->fetchAll();
         return $record;
     }
-
+}
 ?>
