@@ -82,7 +82,7 @@ abstract class model
 {
     protected $tableName;
     // Function to save record
-    public function save()
+   public function save()
     {
         if ($this->id != '') 
         {
@@ -100,7 +100,7 @@ abstract class model
         }
         $stmt->execute();
         $id = $db->lastInsertId();
-        return $id;
+      return $id;
     }
 
     private function insert() 
@@ -145,9 +145,31 @@ class todo extends model
     }
 } 
 
+class main{
+   public function __construct()
+   {
+    // ACCOUNTS TABLE 
+    // Finding all Records
+    $HTMLtag = '<html>';
+    $HTMLtag .= '<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">';
+    $HTMLtag .= '<link rel="stylesheet" href="styles.css">';
+    $HTMLtag .= '<body>'; 
+    $HTMLtag .= '<h1>Accounts table</h2>';
+    $HTMLtag .= '<h2>1) Display All Records</h2>';
+    $records = accounts::findAll();
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .='<left>'.$html.'</left><hr>'; 
+    // Finding single record 
+    $id = 2;
+    $records = accounts::findOne($id);
+    $html = displayHtml::displayTableAlternate($records);
+    $HTMLtag .= '<h2> 2) Display One Record</h2>';
+    $HTMLtag .="<h3>Record fetched with the following id - ".$id."</h3>";
+    $HTMLtag .= '<left>'.$html.'</left><hr>';
+    print_r($HTMLtag);
 
 
   }
-
-
+}
+}
 ?>
