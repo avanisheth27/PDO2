@@ -102,5 +102,16 @@ abstract class model
         $id = $db->lastInsertId();
         return $id;
     }
+
+    private function insert() 
+    {      
+        $modelName=get_called_class();
+        $tableName = $modelName::getTablename();
+        $array = get_object_vars($this);
+        $columnString = implode(',', array_flip($array));
+        $valueString = ':'.implode(',:', array_flip($array));
+        $sql =  'INSERT INTO '.$tableName.' ('.$columnString.') VALUES ('.$valueString.')';
+        return $sql;
+    }
   }
 ?>
