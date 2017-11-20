@@ -193,6 +193,49 @@ class main{
     $HTMLtag .= '<h2> 2) Display One Record</h2>';
     $HTMLtag .="<h3>Record fetched with the following id - ".$id."</h3>";
     $HTMLtag .= '<left>'.$html.'</left><hr>';
+
+     // Inserting New Record
+    $HTMLtag .="<h2> 3) Insert:</h2>";
+    $record = new account();
+    $record->email="palak659@njit.edu";
+    $record->fname="palak";
+    $record->lname="patel";
+    $record->phone="66612";
+    $record->birthday="9-1-2000";
+    $record->gender="female";
+    $record->password="hhhhhh";
+    $lstId=$record->save();
+    $records = accounts::findAll();
+    $HTMLtag .="<h3> New record inserted with the following id - ".$lstId."</h3>";
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .='<h3>Record is inserted - </h3>';
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    // Updating exisiting record 
+    $HTMLtag .= "<h2> 4) Updating Record</h2>";
+    $records = accounts::findOne($lstId);
+    $record = new account();
+    $record->id=$records->id;
+    $record->email="updatedemail@njit.edu";
+    $record->fname="ppppp";
+    $record->lname="p2";
+    $record->gender="female";
+    $record->save();
+    $records = accounts::findAll();
+    $HTMLtag .="<h3>Updating the record with the following id: ".$lstId."</h3>";
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .='<left>'.$html.'</left><hr>';
+    // Deleting Record 
+    $HTMLtag .= "<h2> 5) Delete a Record</h2>";
+    $records = accounts::findOne($lstId);
+    $record= new account();
+    $record->id=$records->id;
+    $records->delete();
+    $HTMLtag .='<h3>Record with the id: '.$records->id.' has been deleted</h3>';
+    $records = accounts::findAll();
+    $html = displayHtml::displayTable($records);
+    $HTMLtag .='<h3>After record has been deleteds</h3>';
+    $HTMLtag .='<left>'.$html.'</left><br><hr>';
+   
     print_r($HTMLtag);
 
 
