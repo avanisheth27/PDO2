@@ -54,7 +54,7 @@ abstract class collection
         $record =  $stmt->fetchAll();
         return $record;
     }
-    
+
      static public function findOne($id) 
      {
         $db = dbConn::getConnection();
@@ -68,4 +68,15 @@ abstract class collection
         return $record[0];
     }
 }
+//accounts table
+class accounts extends collection 
+{
+    protected static $modelName = 'account';
+}
+//todos table
+class todos extends collection 
+{
+    protected static $modelName = 'todo';
+}
+
 ?>
