@@ -113,5 +113,41 @@ abstract class model
         $sql =  'INSERT INTO '.$tableName.' ('.$columnString.') VALUES ('.$valueString.')';
         return $sql;
     }
+class account extends model 
+{
+    public $id;
+    public $email;
+    public $fname;
+    public $lname;
+    public $phone;
+    public $birthday;
+    public $gender;
+    public $password;
+    public static function getTablename(){
+        $tableName='accounts';
+        return $tableName;
+    }
+}
+// Todos table model
+class todo extends model 
+{
+    public $id;
+    public $owneremail;
+    public $ownerid;
+    public $createddate;
+    public $duedate;
+    public $message;
+    public $isdone;
+    public static function getTablename()
+    {
+        $tableName='todos';
+        return $tableName;
+    }
+} 
+
+
+
   }
+
+
 ?>
