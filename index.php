@@ -54,5 +54,18 @@ abstract class collection
         $record =  $stmt->fetchAll();
         return $record;
     }
+    
+     static public function findOne($id) 
+     {
+        $db = dbConn::getConnection();
+        $tableName = get_called_class();
+        $sql = 'SELECT * FROM ' . $tableName . ' WHERE id =' . $id;
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $class = static::$modelName;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, $class);
+        $record =  $stmt->fetchAll();
+        return $record[0];
+    }
 }
 ?>
