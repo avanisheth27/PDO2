@@ -78,5 +78,29 @@ class todos extends collection
 {
     protected static $modelName = 'todo';
 }
-
+abstract class model 
+{
+    protected $tableName;
+    // Function to save record
+    public function save()
+    {
+        if ($this->id != '') 
+        {
+            $sql = $this->update();
+        } else
+         {
+           $sql = $this->insert();
+         }
+        $db = dbConn::getConnection();
+        $stmt = $db->prepare($sql);
+        $array = get_object_vars($this);
+        foreach (array_flip($array) as $key=>$value)
+        {
+            $stmt->bindParam(":$value", $this->$value);
+        }
+        $stmt->execute();
+        $id = $db->lastInsertId();
+        return $id;
+    }
+  }
 ?>
